@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Kiwi Shooter 🐦</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+  <!-- HUD -->
+  <header class="hud">
+    <div class="hud-block">
+      <span class="hud-label">💰 เงิน</span>
+      <span class="hud-value" id="money">0</span>
+    </div>
+    <div class="hud-center">
+      <span class="game-title">KIWI SHOOTER</span>
+    </div>
+    <div class="hud-block">
+      <span class="hud-label">⭐ เควส</span>
+      <span class="hud-value" id="questCount">0/0</span>
+    </div>
+  </header>
+
+  <!-- Game area -->
+  <div class="game-area" id="gameArea">
+    <div class="crosshair" id="crosshair">+</div>
+  </div>
+
+  <!-- Side panels (tablet/desktop) -->
+  <aside class="panel panel-left">
+    <h2 class="panel-title">🛍️ ไอเทม</h2>
+    <div id="itemList"></div>
+  </aside>
+  <aside class="panel panel-right">
+    <h2 class="panel-title">📋 เควส</h2>
+    <div id="questList"></div>
+  </aside>
+
+  <!-- Bottom bar (มือถือเล็ก < 480px) -->
+  <div class="bottom-bar" id="bottomBar">
+    <div class="bottom-tabs">
+      <button class="bottom-tab active" id="tabItem" onclick="switchTab('item')">🛍️ ไอเทม</button>
+      <button class="bottom-tab" id="tabQuest" onclick="switchTab('quest')">📋 เควส</button>
+    </div>
+    <div class="bottom-content" id="bottomContent"></div>
+  </div>
+
+  <!-- Flash -->
+  <div class="multiplier-flash" id="multFlash"></div>
+
+  <!-- JS โหลดสุดท้าย -->
+  <script src="game.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Kiwi Shooter 🐦</title>
+  <link rel="stylesheet" href="menu.css"/>
+</head>
+<body>
+
+  <!-- BG particles -->
+  <canvas id="bgCanvas"></canvas>
+
+  <!-- Main Menu -->
+  <div class="menu" id="menuMain">
+    <div class="logo-wrap">
+      <img src="kiwi.png" class="logo-bird" id="logoBird" alt="kiwi"/>
+      <h1 class="logo-title">KIWI<br/>SHOOTER</h1>
+    </div>
+
+    <nav class="btn-list">
+      <button class="menu-btn btn-play" onclick="goPlay()">
+        <span class="btn-icon">▶</span> เล่นเกม
+      </button>
+      <button class="menu-btn btn-skin" onclick="openPanel('skin')">
+        <span class="btn-icon">🎨</span> สกิน
+      </button>
+      <button class="menu-btn btn-effect" onclick="openPanel('effect')">
+        <span class="btn-icon">✨</span> เอฟเฟกต์
+      </button>
+    </nav>
+
+    <p class="version"><!-- ver --> · idam3104-lgtm</p>
+  </div>
+
+  <!-- Panel: Skin -->
+  <div class="panel-overlay" id="panelSkin">
+    <div class="panel-box">
+      <button class="panel-close" onclick="closePanel('skin')">✕</button>
+      <h2 class="panel-title">🎨 เลือกสกิน</h2>
+      <div class="skin-grid" id="skinGrid"></div>
+    </div>
+  </div>
+
+  <!-- Panel: Effect -->
+  <div class="panel-overlay" id="panelEffect">
+    <div class="panel-box">
+      <button class="panel-close" onclick="closePanel('effect')">✕</button>
+      <h2 class="panel-title">✨ เลือกเอฟเฟกต์</h2>
+      <div class="effect-list" id="effectList"></div>
+    </div>
+  </div>
+
+  <script src="menu.js"></script>
+</body>
+</html>

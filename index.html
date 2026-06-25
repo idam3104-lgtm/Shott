@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Kiwi Shooter 🐦</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+  <!-- หน้าบอกหมุนจอ (แสดงเมื่อเป็นแนวตั้ง) -->
+  <div class="rotate-screen" id="rotateScreen">
+    <div class="rotate-inner">
+      <div class="rotate-icon">📱</div>
+      <div class="rotate-arrow">↻</div>
+      <div class="rotate-text">กรุณาหมุนจอเป็นแนวนอน</div>
+      <div class="rotate-sub">เกมนี้เล่นได้ในโหมด Landscape เท่านั้น</div>
+    </div>
+  </div>
+
+  <!-- HUD -->
+  <header class="hud">
+    <div class="hud-block">
+      <span class="hud-label">💰 เงิน</span>
+      <span class="hud-value" id="money">0</span>
+    </div>
+    <div class="hud-center">
+      <span class="game-title">KIWI SHOOTER</span>
+    </div>
+    <div class="hud-block">
+      <span class="hud-label">⭐ เควส</span>
+      <span class="hud-value" id="questCount">0/0</span>
+    </div>
+  </header>
+
+  <!-- Game area -->
+  <div class="game-area" id="gameArea">
+    <div class="crosshair" id="crosshair">+</div>
+  </div>
+
+  <!-- Side panels -->
+  <aside class="panel panel-left">
+    <h2 class="panel-title">🛍️ ไอเทม</h2>
+    <div id="itemList"></div>
+  </aside>
+  <aside class="panel panel-right">
+    <h2 class="panel-title">📋 เควส</h2>
+    <div id="questList"></div>
+  </aside>
+
+  <!-- Bottom bar (landscape มือถือเล็ก) -->
+  <div class="bottom-bar" id="bottomBar">
+    <div class="bottom-tabs">
+      <button class="bottom-tab active" id="tabItem" onclick="switchTab('item')">🛍️ ไอเทม</button>
+      <button class="bottom-tab" id="tabQuest" onclick="switchTab('quest')">📋 เควส</button>
+    </div>
+    <div class="bottom-content" id="bottomContent"></div>
+  </div>
+
+  <!-- Flash -->
+  <div class="multiplier-flash" id="multFlash"></div>
+
+  <script src="game.js"></script>
+  <script>
+    // ลอง lock orientation ถ้า browser รองรับ
+    if (screen.orientation && screen.orientation.lock) {
+      screen.orientation.lock('landscape').catch(function(){});
+    }
+
+    function checkOrientation() {
+      var rs = document.getElementById('rotateScreen');
+      if (!rs) return;
+      var isLandscape = window.innerWidth > window.innerHeight;
+      rs.style.display = isLandscape ? 'none' : 'flex';
+    }
+
+    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', function() {
+      setTimeout(checkOrientation, 200);
+    });
+    checkOrientation();
+  </script>
+</body>
+</html>

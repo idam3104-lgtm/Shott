@@ -8,29 +8,41 @@
 </head>
 <body>
 
-  <!-- หน้าหมุนจอ -->
-  <div id="rotateScreen" style="display:none;position:fixed;inset:0;z-index:99999;background:#0f172a;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-family:system-ui,sans-serif;">
+  <!-- Rotate overlay -->
+  <div id="rotateScreen" style="display:none;position:fixed;inset:0;z-index:99999;background:#5bc8f5;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
     <div style="font-size:4rem;animation:spinPhone 1.5s ease-in-out infinite alternate">📱</div>
-    <div style="font-size:1rem;font-weight:700;color:#f1f5f9">กรุณาหมุนจอเป็นแนวนอน</div>
-    <div style="font-size:.75rem;color:#94a3b8">เกมนี้เล่นได้ในโหมด Landscape เท่านั้น</div>
-    <style>@keyframes spinPhone { from{transform:rotate(0deg)} to{transform:rotate(90deg)} }</style>
+    <div style="font-size:1rem;font-weight:900;color:#333;-webkit-text-stroke:.5px #333">กรุณาหมุนจอเป็นแนวนอน</div>
+    <style>@keyframes spinPhone{from{transform:rotate(0deg)}to{transform:rotate(90deg)}}</style>
   </div>
 
-  <!-- BG canvas -->
-  <canvas id="bgCanvas"></canvas>
+  <!-- Decorations -->
+  <div class="sun"></div>
+  <div class="cloud" id="c1"></div>
+  <div class="cloud" id="c2"></div>
 
   <!-- Main Menu -->
-  <div class="menu" id="menuMain">
-    <div class="logo-wrap">
+  <div class="menu">
+
+    <!-- Left: Logo -->
+    <div class="logo-side">
       <img src="kiwi.png" class="logo-bird" id="logoBird" alt="kiwi"/>
-      <h1 class="logo-title">KIWI<br/>SHOOTER</h1>
+      <h1 class="logo-title">KIWI<br/><span class="logo-star">⭐</span>SH<span class="logo-star">⭐</span>TER</h1>
     </div>
-    <nav class="btn-list">
-      <button class="menu-btn btn-play" id="btnPlay"><span class="btn-icon">▶</span> เล่นเกม</button>
-      <button class="menu-btn btn-skin" id="btnSkin"><span class="btn-icon">🎨</span> สกิน</button>
-      <button class="menu-btn btn-effect" id="btnEffect"><span class="btn-icon">✨</span> เอฟเฟกต์</button>
-    </nav>
-    <p class="version">· idam3104-lgtm</p>
+
+    <!-- Right: Buttons -->
+    <div class="btn-side">
+      <button class="menu-btn btn-play" id="btnPlay">
+        <span class="btn-icon">▶</span> เล่นเกม!
+      </button>
+      <button class="menu-btn btn-skin" id="btnSkin">
+        <span class="btn-icon">🎨</span> สกิน
+      </button>
+      <button class="menu-btn btn-effect" id="btnEffect">
+        <span class="btn-icon">✨</span> เอฟเฟกต์
+      </button>
+      <p class="version">· idam3104-lgtm</p>
+    </div>
+
   </div>
 
   <!-- Panel: Skin -->
@@ -52,172 +64,122 @@
   </div>
 
 <script>
-/* ── Skins ── */
+/* ── Data ── */
 var SKINS = [
-  { id:'kiwi',   name:'กีวี่',     img:'kiwi.png', cost:0,   unlocked:true  },
-  { id:'gold',   name:'ทองคำ',     img:'gold.png', cost:0,   unlocked:true  },
-  { id:'devil',  name:'ปีศาจ',     img:'boss.png', cost:500, unlocked:false },
-  { id:'emoji1', name:'เพนกวิน',   emoji:'🐧',     cost:200, unlocked:false },
-  { id:'emoji2', name:'นกแก้ว',    emoji:'🦜',     cost:200, unlocked:false },
-  { id:'emoji3', name:'นกยูง',     emoji:'🦚',     cost:300, unlocked:false },
+  {id:'kiwi',  name:'กีวี่',   img:'kiwi.png', cost:0,   unlocked:true },
+  {id:'gold',  name:'ทองคำ',   img:'gold.png', cost:0,   unlocked:true },
+  {id:'devil', name:'ปีศาจ',   img:'boss.png', cost:500, unlocked:false},
+  {id:'p1',    name:'เพนกวิน', emoji:'🐧',     cost:200, unlocked:false},
+  {id:'p2',    name:'นกแก้ว',  emoji:'🦜',     cost:200, unlocked:false},
+  {id:'p3',    name:'นกยูง',   emoji:'🦚',     cost:300, unlocked:false},
 ];
-
-/* ── Effects ── */
 var EFFECTS = [
-  { id:'boom',    icon:'💥', name:'ระเบิดไฟ',  desc:'ระเบิดสีส้มคลาสสิก',      cost:0,   unlocked:true  },
-  { id:'star',    icon:'⭐', name:'ดาวกระจาย', desc:'กระจายดาวทองรอบจุดยิง',   cost:150, unlocked:false },
-  { id:'heart',   icon:'❤️', name:'หัวใจ',     desc:'ระเบิดเป็นหัวใจสีแดง',    cost:150, unlocked:false },
-  { id:'rainbow', icon:'🌈', name:'รุ้งสีสัน', desc:'เส้นสีรุ้งกระจายออกมา',   cost:300, unlocked:false },
-  { id:'ice',     icon:'❄️', name:'น้ำแข็ง',   desc:'ระเบิดแช่แข็งสีฟ้า',      cost:300, unlocked:false },
-  { id:'money',   icon:'💸', name:'เงินร่วง',  desc:'แบงก์และเหรียญร่วงกระจาย',cost:500, unlocked:false },
+  {id:'boom',    icon:'💥', name:'ระเบิดไฟ',  desc:'คลาสสิก',         cost:0,   unlocked:true },
+  {id:'star',    icon:'⭐', name:'ดาวกระจาย', desc:'ดาวทองรอบจุดยิง', cost:150, unlocked:false},
+  {id:'heart',   icon:'❤️', name:'หัวใจ',     desc:'ระเบิดหัวใจแดง',  cost:150, unlocked:false},
+  {id:'rainbow', icon:'🌈', name:'รุ้งสีสัน', desc:'สีรุ้งกระจาย',    cost:300, unlocked:false},
+  {id:'ice',     icon:'❄️', name:'น้ำแข็ง',   desc:'ระเบิดสีฟ้า',     cost:300, unlocked:false},
+  {id:'money',   icon:'💸', name:'เงินร่วง',  desc:'แบงก์ร่วงกระจาย', cost:500, unlocked:false},
 ];
 
 /* ── Storage ── */
-function save(key, val) { try { localStorage.setItem('kiwi_'+key, JSON.stringify(val)); } catch(e){} }
-function load(key, def) { try { var v=localStorage.getItem('kiwi_'+key); return v?JSON.parse(v):def; } catch(e){ return def; } }
+function save(k,v){try{localStorage.setItem('kiwi_'+k,JSON.stringify(v));}catch(e){}}
+function load(k,d){try{var v=localStorage.getItem('kiwi_'+k);return v?JSON.parse(v):d;}catch(e){return d;}}
 
-var selectedSkin    = load('skin',   'kiwi');
-var selectedEffect  = load('effect', 'boom');
-var unlockedSkins   = load('unlocked_skins',   ['kiwi','gold']);
-var unlockedEffects = load('unlocked_effects', ['boom']);
+var selSkin   = load('skin','kiwi');
+var selEffect = load('effect','boom');
+var okSkins   = load('ok_skins',  ['kiwi','gold']);
+var okEffects = load('ok_effects',['boom']);
 
-/* ── Render Skins ── */
-function renderSkins() {
-  var el = document.getElementById('skinGrid');
-  if (!el) return;
-  el.innerHTML = SKINS.map(function(s) {
-    var ok  = unlockedSkins.indexOf(s.id) >= 0;
-    var sel = selectedSkin === s.id;
-    var pre = s.img
-      ? '<img class="skin-preview" src="'+s.img+'" alt="'+s.name+'"/>'
-      : '<div class="skin-preview-emoji">'+s.emoji+'</div>';
-    var badge = sel ? '<div class="skin-badge">✓ ใช้อยู่</div>'
-      : ok ? '<div style="font-size:.6rem;color:var(--green)">ปลดแล้ว</div>'
-      : '<div class="skin-cost">💰 '+s.cost+'</div>';
-    return '<div class="skin-card'+(sel?' selected':'')+(ok?'':' locked')+'" onclick="selectSkin(\''+s.id+'\')">'+pre+'<div class="skin-name">'+s.name+'</div>'+badge+'</div>';
+/* ── Render ── */
+function renderSkins(){
+  document.getElementById('skinGrid').innerHTML = SKINS.map(function(s){
+    var ok=okSkins.indexOf(s.id)>=0, sel=selSkin===s.id;
+    var pre=s.img?'<img class="skin-preview" src="'+s.img+'"/>':'<div class="skin-preview-emoji">'+s.emoji+'</div>';
+    var badge=sel?'<div class="skin-badge">✓ ใช้อยู่</div>':ok?'<div style="font-size:.6rem;color:green">ปลดแล้ว</div>':'<div class="skin-cost">💰'+s.cost+'</div>';
+    return '<div class="skin-card'+(sel?' selected':'')+(ok?'':' locked')+'" onclick="pickSkin(\''+s.id+'\')">'+pre+'<div class="skin-name">'+s.name+'</div>'+badge+'</div>';
   }).join('');
 }
-
-function selectSkin(id) {
-  var s = SKINS.find(function(x){ return x.id===id; });
-  if (!s) return;
-  if (unlockedSkins.indexOf(id) < 0) { showToast('ยังไม่ได้ปลดล็อค!'); return; }
-  selectedSkin = id;
-  save('skin', id);
-  var lb = document.getElementById('logoBird');
-  if (lb && s.img) lb.src = s.img;
-  renderSkins();
-  showToast('เลือกสกิน '+s.name+' แล้ว!');
-}
-
-/* ── Render Effects ── */
-function renderEffects() {
-  var el = document.getElementById('effectList');
-  if (!el) return;
-  el.innerHTML = EFFECTS.map(function(e) {
-    var ok  = unlockedEffects.indexOf(e.id) >= 0;
-    var sel = selectedEffect === e.id;
-    var badge = sel ? '<div class="effect-badge">✓ ใช้อยู่</div>'
-      : !ok ? '<div class="effect-cost">💰 '+e.cost+'</div>' : '';
-    return '<div class="effect-card'+(sel?' selected':'')+(ok?'':' locked')+'" onclick="selectEffect(\''+e.id+'\')">'+
+function renderEffects(){
+  document.getElementById('effectList').innerHTML = EFFECTS.map(function(e){
+    var ok=okEffects.indexOf(e.id)>=0, sel=selEffect===e.id;
+    var badge=sel?'<div class="effect-badge">✓ ใช้อยู่</div>':!ok?'<div class="effect-cost">💰'+e.cost+'</div>':'';
+    return '<div class="effect-card'+(sel?' selected':'')+(ok?'':' locked')+'" onclick="pickEffect(\''+e.id+'\')">'+
       '<div class="effect-icon">'+e.icon+'</div>'+
       '<div class="effect-info"><div class="effect-name">'+e.name+'</div><div class="effect-desc">'+e.desc+'</div></div>'+
       badge+'</div>';
   }).join('');
 }
 
-function selectEffect(id) {
-  var ef = EFFECTS.find(function(x){ return x.id===id; });
-  if (!ef) return;
-  if (unlockedEffects.indexOf(id) < 0) { showToast('ยังไม่ได้ปลดล็อค!'); return; }
-  selectedEffect = id;
-  save('effect', id);
-  renderEffects();
-  showToast('เลือกเอฟเฟกต์ '+ef.name+' แล้ว!');
+function pickSkin(id){
+  if(okSkins.indexOf(id)<0){toast('ยังไม่ได้ปลดล็อค!');return;}
+  selSkin=id; save('skin',id);
+  var s=SKINS.find(function(x){return x.id===id;});
+  if(s&&s.img) document.getElementById('logoBird').src=s.img;
+  renderSkins(); toast('เลือกสกิน '+s.name+'!');
+}
+function pickEffect(id){
+  if(okEffects.indexOf(id)<0){toast('ยังไม่ได้ปลดล็อค!');return;}
+  selEffect=id; save('effect',id);
+  var e=EFFECTS.find(function(x){return x.id===id;});
+  renderEffects(); toast('เลือกเอฟเฟกต์ '+e.name+'!');
 }
 
 /* ── Panel ── */
-function openPanel(name) {
-  var id = 'panel'+name.charAt(0).toUpperCase()+name.slice(1);
-  document.getElementById(id).classList.add('open');
-}
-function closePanel(name) {
-  var id = 'panel'+name.charAt(0).toUpperCase()+name.slice(1);
-  document.getElementById(id).classList.remove('open');
-}
+function openPanel(n){document.getElementById('panel'+n[0].toUpperCase()+n.slice(1)).classList.add('open');}
+function closePanel(n){document.getElementById('panel'+n[0].toUpperCase()+n.slice(1)).classList.remove('open');}
 
-/* ── Go Play ── */
-function goPlay() {
-  save('skin', selectedSkin);
-  save('effect', selectedEffect);
-  window.location.href = 'index.html?play=1';
+/* ── Play ── */
+function goPlay(){
+  save('skin',selSkin); save('effect',selEffect);
+  window.location.href='index.html?play=1';
 }
 
 /* ── Toast ── */
-function showToast(msg) {
-  var t = document.getElementById('toast');
-  if (!t) {
-    t = document.createElement('div');
-    t.id = 'toast';
-    t.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(30,41,59,.95);color:#f1f5f9;padding:10px 20px;border-radius:99px;font-size:.8rem;font-weight:600;z-index:9999;pointer-events:none;white-space:nowrap;max-width:90vw;transition:opacity .3s';
-    document.body.appendChild(t);
-  }
-  t.textContent = msg;
-  t.style.opacity = '1';
-  clearTimeout(t._timer);
-  t._timer = setTimeout(function(){ t.style.opacity='0'; }, 2000);
+function toast(msg){
+  var t=document.getElementById('_toast');
+  if(!t){t=document.createElement('div');t.id='_toast';t.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:8px 18px;border-radius:99px;font-size:.8rem;font-weight:700;z-index:9999;pointer-events:none;white-space:nowrap;transition:opacity .3s;border:2px solid #000';document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity='1';
+  clearTimeout(t._t);t._t=setTimeout(function(){t.style.opacity='0';},2000);
 }
 
-/* ── BG Canvas ── */
-(function(){
-  var canvas = document.getElementById('bgCanvas');
-  var ctx = canvas.getContext('2d');
-  var birds = [];
-  function resize(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
-  window.addEventListener('resize', resize); resize();
-  for (var i=0;i<8;i++) birds.push({
-    x:Math.random()*canvas.width, y:Math.random()*canvas.height,
-    speed:0.4+Math.random()*0.6, size:16+Math.random()*20,
-    emoji:['🥝','🐦','🦤'][Math.floor(Math.random()*3)],
-    dir:Math.random()>0.5?1:-1, alpha:0.08+Math.random()*0.12
-  });
-  function draw(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    birds.forEach(function(b){
-      ctx.save(); ctx.globalAlpha=b.alpha; ctx.font=b.size+'px serif';
-      ctx.scale(b.dir,1); ctx.fillText(b.emoji,b.dir>0?b.x:-b.x,b.y); ctx.restore();
-      b.x+=b.speed*b.dir;
-      if(b.x>canvas.width+60) b.x=-60;
-      if(b.x<-60) b.x=canvas.width+60;
-    });
-    requestAnimationFrame(draw);
-  }
-  draw();
-})();
+/* ── Clouds ── */
+function makeCloud(el,w,h,top,dur,delay){
+  el.style.cssText='width:'+w+'px;height:'+h+'px;top:'+top+'%;animation-duration:'+dur+'s;animation-delay:'+delay+'s;';
+  el.style.setProperty('--bw',Math.round(w*.6)+'px');
+  el.style.setProperty('--bh',Math.round(h*1.1)+'px');
+}
+var c1=document.getElementById('c1'), c2=document.getElementById('c2');
+if(c1){
+  c1.style.cssText='position:fixed;background:#fff;border-radius:50px;border:2px solid #ccc;opacity:.9;z-index:0;width:120px;height:40px;top:12%;animation:cloudFloat 28s linear infinite;';
+  var b1=document.createElement('div');b1.style.cssText='position:absolute;background:#fff;border:2px solid #ccc;border-radius:50%;width:60px;height:55px;top:-30px;left:20px;';c1.appendChild(b1);
+}
+if(c2){
+  c2.style.cssText='position:fixed;background:#fff;border-radius:50px;border:2px solid #ccc;opacity:.85;z-index:0;width:90px;height:30px;top:28%;animation:cloudFloat 38s linear infinite;animation-delay:-14s;';
+  var b2=document.createElement('div');b2.style.cssText='position:absolute;background:#fff;border:2px solid #ccc;border-radius:50%;width:44px;height:40px;top:-22px;left:16px;';c2.appendChild(b2);
+}
 
 /* ── Orientation ── */
-function checkOrientation(){
+function checkOri(){
   var rs=document.getElementById('rotateScreen');
-  if(!rs) return;
-  rs.style.display = window.innerWidth>window.innerHeight?'none':'flex';
+  if(rs) rs.style.display=window.innerWidth>window.innerHeight?'none':'flex';
 }
-window.addEventListener('resize', checkOrientation);
-window.addEventListener('orientationchange', function(){ setTimeout(checkOrientation,300); });
-if (screen.orientation&&screen.orientation.lock) screen.orientation.lock('landscape').catch(function(){});
-checkOrientation();
+window.addEventListener('resize',checkOri);
+window.addEventListener('orientationchange',function(){setTimeout(checkOri,300);});
+if(screen.orientation&&screen.orientation.lock) screen.orientation.lock('landscape').catch(function(){});
+checkOri();
 
-/* ── Bind buttons ── */
-document.getElementById('btnPlay').addEventListener('click', goPlay);
-document.getElementById('btnSkin').addEventListener('click', function(){ openPanel('skin'); });
-document.getElementById('btnEffect').addEventListener('click', function(){ openPanel('effect'); });
-document.getElementById('closeSkin').addEventListener('click', function(){ closePanel('skin'); });
-document.getElementById('closeEffect').addEventListener('click', function(){ closePanel('effect'); });
+/* ── Bind ── */
+document.getElementById('btnPlay').addEventListener('click',goPlay);
+document.getElementById('btnSkin').addEventListener('click',function(){openPanel('skin');});
+document.getElementById('btnEffect').addEventListener('click',function(){openPanel('effect');});
+document.getElementById('closeSkin').addEventListener('click',function(){closePanel('skin');});
+document.getElementById('closeEffect').addEventListener('click',function(){closePanel('effect');});
 
-/* ── INIT ── */
-renderSkins();
-renderEffects();
-var curSkin = SKINS.find(function(s){ return s.id===selectedSkin; });
-if (curSkin&&curSkin.img) document.getElementById('logoBird').src = curSkin.img;
+/* ── Init ── */
+renderSkins(); renderEffects();
+var cs=SKINS.find(function(s){return s.id===selSkin;});
+if(cs&&cs.img) document.getElementById('logoBird').src=cs.img;
 </script>
 </body>
 </html>

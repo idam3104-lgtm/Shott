@@ -9,21 +9,11 @@
 <body>
 
   <!-- หน้าหมุนจอ -->
-  <div id="rotateScreen" style="
-    display:none;position:fixed;inset:0;z-index:99999;
-    background:#0f172a;flex-direction:column;
-    align-items:center;justify-content:center;gap:16px;
-    font-family:system-ui,sans-serif;
-  ">
+  <div id="rotateScreen" style="display:none;position:fixed;inset:0;z-index:99999;background:#0f172a;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-family:system-ui,sans-serif;">
     <div style="font-size:4rem;animation:spinPhone 1.5s ease-in-out infinite alternate">📱</div>
     <div style="font-size:1rem;font-weight:700;color:#f1f5f9">กรุณาหมุนจอเป็นแนวนอน</div>
     <div style="font-size:.75rem;color:#94a3b8">เกมนี้เล่นได้ในโหมด Landscape เท่านั้น</div>
-    <style>
-      @keyframes spinPhone {
-        from { transform: rotate(0deg); }
-        to   { transform: rotate(90deg); }
-      }
-    </style>
+    <style>@keyframes spinPhone { from{transform:rotate(0deg)} to{transform:rotate(90deg)} }</style>
   </div>
 
   <!-- BG canvas -->
@@ -35,19 +25,11 @@
       <img src="kiwi.png" class="logo-bird" id="logoBird" alt="kiwi"/>
       <h1 class="logo-title">KIWI<br/>SHOOTER</h1>
     </div>
-
     <nav class="btn-list">
-      <button class="menu-btn btn-play" id="btnPlay">
-        <span class="btn-icon">▶</span> เล่นเกม
-      </button>
-      <button class="menu-btn btn-skin" id="btnSkin">
-        <span class="btn-icon">🎨</span> สกิน
-      </button>
-      <button class="menu-btn btn-effect" id="btnEffect">
-        <span class="btn-icon">✨</span> เอฟเฟกต์
-      </button>
+      <button class="menu-btn btn-play" id="btnPlay"><span class="btn-icon">▶</span> เล่นเกม</button>
+      <button class="menu-btn btn-skin" id="btnSkin"><span class="btn-icon">🎨</span> สกิน</button>
+      <button class="menu-btn btn-effect" id="btnEffect"><span class="btn-icon">✨</span> เอฟเฟกต์</button>
     </nav>
-
     <p class="version">· idam3104-lgtm</p>
   </div>
 
@@ -69,27 +51,173 @@
     </div>
   </div>
 
-  <script src="menu.js"></script>
-  <script>
-    // landscape check
-    function checkOrientation() {
-      var rs = document.getElementById('rotateScreen');
-      if (!rs) return;
-      rs.style.display = window.innerWidth > window.innerHeight ? 'none' : 'flex';
-    }
-    window.addEventListener('resize', checkOrientation);
-    window.addEventListener('orientationchange', function(){ setTimeout(checkOrientation, 300); });
-    if (screen.orientation && screen.orientation.lock) {
-      screen.orientation.lock('landscape').catch(function(){});
-    }
-    checkOrientation();
+<script>
+/* ── Skins ── */
+var SKINS = [
+  { id:'kiwi',   name:'กีวี่',     img:'kiwi.png', cost:0,   unlocked:true  },
+  { id:'gold',   name:'ทองคำ',     img:'gold.png', cost:0,   unlocked:true  },
+  { id:'devil',  name:'ปีศาจ',     img:'boss.png', cost:500, unlocked:false },
+  { id:'emoji1', name:'เพนกวิน',   emoji:'🐧',     cost:200, unlocked:false },
+  { id:'emoji2', name:'นกแก้ว',    emoji:'🦜',     cost:200, unlocked:false },
+  { id:'emoji3', name:'นกยูง',     emoji:'🦚',     cost:300, unlocked:false },
+];
 
-    // ปุ่มต่างๆ ใช้ addEventListener แทน onclick
-    document.getElementById('btnPlay').addEventListener('click', function(){ goPlay(); });
-    document.getElementById('btnSkin').addEventListener('click', function(){ openPanel('skin'); });
-    document.getElementById('btnEffect').addEventListener('click', function(){ openPanel('effect'); });
-    document.getElementById('closeSkin').addEventListener('click', function(){ closePanel('skin'); });
-    document.getElementById('closeEffect').addEventListener('click', function(){ closePanel('effect'); });
-  </script>
+/* ── Effects ── */
+var EFFECTS = [
+  { id:'boom',    icon:'💥', name:'ระเบิดไฟ',  desc:'ระเบิดสีส้มคลาสสิก',      cost:0,   unlocked:true  },
+  { id:'star',    icon:'⭐', name:'ดาวกระจาย', desc:'กระจายดาวทองรอบจุดยิง',   cost:150, unlocked:false },
+  { id:'heart',   icon:'❤️', name:'หัวใจ',     desc:'ระเบิดเป็นหัวใจสีแดง',    cost:150, unlocked:false },
+  { id:'rainbow', icon:'🌈', name:'รุ้งสีสัน', desc:'เส้นสีรุ้งกระจายออกมา',   cost:300, unlocked:false },
+  { id:'ice',     icon:'❄️', name:'น้ำแข็ง',   desc:'ระเบิดแช่แข็งสีฟ้า',      cost:300, unlocked:false },
+  { id:'money',   icon:'💸', name:'เงินร่วง',  desc:'แบงก์และเหรียญร่วงกระจาย',cost:500, unlocked:false },
+];
+
+/* ── Storage ── */
+function save(key, val) { try { localStorage.setItem('kiwi_'+key, JSON.stringify(val)); } catch(e){} }
+function load(key, def) { try { var v=localStorage.getItem('kiwi_'+key); return v?JSON.parse(v):def; } catch(e){ return def; } }
+
+var selectedSkin    = load('skin',   'kiwi');
+var selectedEffect  = load('effect', 'boom');
+var unlockedSkins   = load('unlocked_skins',   ['kiwi','gold']);
+var unlockedEffects = load('unlocked_effects', ['boom']);
+
+/* ── Render Skins ── */
+function renderSkins() {
+  var el = document.getElementById('skinGrid');
+  if (!el) return;
+  el.innerHTML = SKINS.map(function(s) {
+    var ok  = unlockedSkins.indexOf(s.id) >= 0;
+    var sel = selectedSkin === s.id;
+    var pre = s.img
+      ? '<img class="skin-preview" src="'+s.img+'" alt="'+s.name+'"/>'
+      : '<div class="skin-preview-emoji">'+s.emoji+'</div>';
+    var badge = sel ? '<div class="skin-badge">✓ ใช้อยู่</div>'
+      : ok ? '<div style="font-size:.6rem;color:var(--green)">ปลดแล้ว</div>'
+      : '<div class="skin-cost">💰 '+s.cost+'</div>';
+    return '<div class="skin-card'+(sel?' selected':'')+(ok?'':' locked')+'" onclick="selectSkin(\''+s.id+'\')">'+pre+'<div class="skin-name">'+s.name+'</div>'+badge+'</div>';
+  }).join('');
+}
+
+function selectSkin(id) {
+  var s = SKINS.find(function(x){ return x.id===id; });
+  if (!s) return;
+  if (unlockedSkins.indexOf(id) < 0) { showToast('ยังไม่ได้ปลดล็อค!'); return; }
+  selectedSkin = id;
+  save('skin', id);
+  var lb = document.getElementById('logoBird');
+  if (lb && s.img) lb.src = s.img;
+  renderSkins();
+  showToast('เลือกสกิน '+s.name+' แล้ว!');
+}
+
+/* ── Render Effects ── */
+function renderEffects() {
+  var el = document.getElementById('effectList');
+  if (!el) return;
+  el.innerHTML = EFFECTS.map(function(e) {
+    var ok  = unlockedEffects.indexOf(e.id) >= 0;
+    var sel = selectedEffect === e.id;
+    var badge = sel ? '<div class="effect-badge">✓ ใช้อยู่</div>'
+      : !ok ? '<div class="effect-cost">💰 '+e.cost+'</div>' : '';
+    return '<div class="effect-card'+(sel?' selected':'')+(ok?'':' locked')+'" onclick="selectEffect(\''+e.id+'\')">'+
+      '<div class="effect-icon">'+e.icon+'</div>'+
+      '<div class="effect-info"><div class="effect-name">'+e.name+'</div><div class="effect-desc">'+e.desc+'</div></div>'+
+      badge+'</div>';
+  }).join('');
+}
+
+function selectEffect(id) {
+  var ef = EFFECTS.find(function(x){ return x.id===id; });
+  if (!ef) return;
+  if (unlockedEffects.indexOf(id) < 0) { showToast('ยังไม่ได้ปลดล็อค!'); return; }
+  selectedEffect = id;
+  save('effect', id);
+  renderEffects();
+  showToast('เลือกเอฟเฟกต์ '+ef.name+' แล้ว!');
+}
+
+/* ── Panel ── */
+function openPanel(name) {
+  var id = 'panel'+name.charAt(0).toUpperCase()+name.slice(1);
+  document.getElementById(id).classList.add('open');
+}
+function closePanel(name) {
+  var id = 'panel'+name.charAt(0).toUpperCase()+name.slice(1);
+  document.getElementById(id).classList.remove('open');
+}
+
+/* ── Go Play ── */
+function goPlay() {
+  save('skin', selectedSkin);
+  save('effect', selectedEffect);
+  window.location.href = 'index.html?play=1';
+}
+
+/* ── Toast ── */
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'toast';
+    t.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(30,41,59,.95);color:#f1f5f9;padding:10px 20px;border-radius:99px;font-size:.8rem;font-weight:600;z-index:9999;pointer-events:none;white-space:nowrap;max-width:90vw;transition:opacity .3s';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(function(){ t.style.opacity='0'; }, 2000);
+}
+
+/* ── BG Canvas ── */
+(function(){
+  var canvas = document.getElementById('bgCanvas');
+  var ctx = canvas.getContext('2d');
+  var birds = [];
+  function resize(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+  window.addEventListener('resize', resize); resize();
+  for (var i=0;i<8;i++) birds.push({
+    x:Math.random()*canvas.width, y:Math.random()*canvas.height,
+    speed:0.4+Math.random()*0.6, size:16+Math.random()*20,
+    emoji:['🥝','🐦','🦤'][Math.floor(Math.random()*3)],
+    dir:Math.random()>0.5?1:-1, alpha:0.08+Math.random()*0.12
+  });
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    birds.forEach(function(b){
+      ctx.save(); ctx.globalAlpha=b.alpha; ctx.font=b.size+'px serif';
+      ctx.scale(b.dir,1); ctx.fillText(b.emoji,b.dir>0?b.x:-b.x,b.y); ctx.restore();
+      b.x+=b.speed*b.dir;
+      if(b.x>canvas.width+60) b.x=-60;
+      if(b.x<-60) b.x=canvas.width+60;
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ── Orientation ── */
+function checkOrientation(){
+  var rs=document.getElementById('rotateScreen');
+  if(!rs) return;
+  rs.style.display = window.innerWidth>window.innerHeight?'none':'flex';
+}
+window.addEventListener('resize', checkOrientation);
+window.addEventListener('orientationchange', function(){ setTimeout(checkOrientation,300); });
+if (screen.orientation&&screen.orientation.lock) screen.orientation.lock('landscape').catch(function(){});
+checkOrientation();
+
+/* ── Bind buttons ── */
+document.getElementById('btnPlay').addEventListener('click', goPlay);
+document.getElementById('btnSkin').addEventListener('click', function(){ openPanel('skin'); });
+document.getElementById('btnEffect').addEventListener('click', function(){ openPanel('effect'); });
+document.getElementById('closeSkin').addEventListener('click', function(){ closePanel('skin'); });
+document.getElementById('closeEffect').addEventListener('click', function(){ closePanel('effect'); });
+
+/* ── INIT ── */
+renderSkins();
+renderEffects();
+var curSkin = SKINS.find(function(s){ return s.id===selectedSkin; });
+if (curSkin&&curSkin.img) document.getElementById('logoBird').src = curSkin.img;
+</script>
 </body>
 </html>

@@ -5,10 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>Kiwi Shooter 🐦</title>
   <link rel="stylesheet" href="style.css"/>
+  <script>
+    // redirect ไป menu ถ้าไม่ได้มาจาก menu
+    if (!sessionStorage.getItem('fromMenu')) {
+      window.location.replace('menu.html');
+    }
+  </script>
 </head>
 <body>
 
-  <!-- หน้าบอกหมุนจอ (แสดงเมื่อเป็นแนวตั้ง) -->
+  <!-- หน้าบอกหมุนจอ -->
   <div class="rotate-screen" id="rotateScreen">
     <div class="rotate-inner">
       <div class="rotate-icon">📱</div>
@@ -32,7 +38,7 @@
         <span class="hud-label">⭐ เควส</span>
         <span class="hud-value" id="questCount">0/0</span>
       </div>
-      <button onclick="window.location.href='menu.html'" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#94a3b8;border-radius:8px;padding:4px 8px;font-size:.65rem;cursor:pointer;-webkit-tap-highlight-color:transparent">☰ เมนู</button>
+      <button onclick="goMenu()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#94a3b8;border-radius:8px;padding:4px 8px;font-size:.65rem;cursor:pointer;-webkit-tap-highlight-color:transparent">☰ เมนู</button>
     </div>
   </header>
 
@@ -51,7 +57,7 @@
     <div id="questList"></div>
   </aside>
 
-  <!-- Bottom bar (landscape มือถือเล็ก) -->
+  <!-- Bottom bar -->
   <div class="bottom-bar" id="bottomBar">
     <div class="bottom-tabs">
       <button class="bottom-tab active" id="tabItem" onclick="switchTab('item')">🛍️ ไอเทม</button>
@@ -65,10 +71,27 @@
 
   <script src="game.js"></script>
   <script>
-    // ลอง lock orientation ถ้า browser รองรับ
+    function goMenu() {
+      sessionStorage.removeItem('fromMenu');
+      window.location.href = 'menu.html';
+    }
+
+    // lock landscape
     if (screen.orientation && screen.orientation.lock) {
       screen.orientation.lock('landscape').catch(function(){});
     }
+
+    function checkOrientation() {
+      var rs = document.getElementById('rotateScreen');
+      if (!rs) return;
+      rs.style.display = window.innerWidth > window.innerHeight ? 'none' : 'flex';
+    }
+    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', function(){ setTimeout(checkOrientation, 200); });
+    checkOrientation();
+  </script>
+</body>
+</html>
 
     function checkOrientation() {
       var rs = document.getElementById('rotateScreen');

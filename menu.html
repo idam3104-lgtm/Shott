@@ -8,7 +8,25 @@
 </head>
 <body>
 
-  <!-- BG particles -->
+  <!-- หน้าหมุนจอ -->
+  <div id="rotateScreen" style="
+    display:none;position:fixed;inset:0;z-index:99999;
+    background:#0f172a;flex-direction:column;
+    align-items:center;justify-content:center;gap:16px;
+    font-family:system-ui,sans-serif;
+  ">
+    <div style="font-size:4rem;animation:spinPhone 1.5s ease-in-out infinite alternate">📱</div>
+    <div style="font-size:1rem;font-weight:700;color:#f1f5f9">กรุณาหมุนจอเป็นแนวนอน</div>
+    <div style="font-size:.75rem;color:#94a3b8">เกมนี้เล่นได้ในโหมด Landscape เท่านั้น</div>
+    <style>
+      @keyframes spinPhone {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(90deg); }
+      }
+    </style>
+  </div>
+
+  <!-- BG canvas -->
   <canvas id="bgCanvas"></canvas>
 
   <!-- Main Menu -->
@@ -19,24 +37,24 @@
     </div>
 
     <nav class="btn-list">
-      <button class="menu-btn btn-play" onclick="goPlay()">
+      <button class="menu-btn btn-play" id="btnPlay">
         <span class="btn-icon">▶</span> เล่นเกม
       </button>
-      <button class="menu-btn btn-skin" onclick="openPanel('skin')">
+      <button class="menu-btn btn-skin" id="btnSkin">
         <span class="btn-icon">🎨</span> สกิน
       </button>
-      <button class="menu-btn btn-effect" onclick="openPanel('effect')">
+      <button class="menu-btn btn-effect" id="btnEffect">
         <span class="btn-icon">✨</span> เอฟเฟกต์
       </button>
     </nav>
 
-    <p class="version"><!-- ver --> · idam3104-lgtm</p>
+    <p class="version">· idam3104-lgtm</p>
   </div>
 
   <!-- Panel: Skin -->
   <div class="panel-overlay" id="panelSkin">
     <div class="panel-box">
-      <button class="panel-close" onclick="closePanel('skin')">✕</button>
+      <button class="panel-close" id="closeSkin">✕</button>
       <h2 class="panel-title">🎨 เลือกสกิน</h2>
       <div class="skin-grid" id="skinGrid"></div>
     </div>
@@ -45,12 +63,33 @@
   <!-- Panel: Effect -->
   <div class="panel-overlay" id="panelEffect">
     <div class="panel-box">
-      <button class="panel-close" onclick="closePanel('effect')">✕</button>
+      <button class="panel-close" id="closeEffect">✕</button>
       <h2 class="panel-title">✨ เลือกเอฟเฟกต์</h2>
       <div class="effect-list" id="effectList"></div>
     </div>
   </div>
 
   <script src="menu.js"></script>
+  <script>
+    // landscape check
+    function checkOrientation() {
+      var rs = document.getElementById('rotateScreen');
+      if (!rs) return;
+      rs.style.display = window.innerWidth > window.innerHeight ? 'none' : 'flex';
+    }
+    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', function(){ setTimeout(checkOrientation, 300); });
+    if (screen.orientation && screen.orientation.lock) {
+      screen.orientation.lock('landscape').catch(function(){});
+    }
+    checkOrientation();
+
+    // ปุ่มต่างๆ ใช้ addEventListener แทน onclick
+    document.getElementById('btnPlay').addEventListener('click', function(){ goPlay(); });
+    document.getElementById('btnSkin').addEventListener('click', function(){ openPanel('skin'); });
+    document.getElementById('btnEffect').addEventListener('click', function(){ openPanel('effect'); });
+    document.getElementById('closeSkin').addEventListener('click', function(){ closePanel('skin'); });
+    document.getElementById('closeEffect').addEventListener('click', function(){ closePanel('effect'); });
+  </script>
 </body>
 </html>

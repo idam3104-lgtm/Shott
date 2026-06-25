@@ -6,7 +6,6 @@
   <title>Kiwi Shooter 🐦</title>
   <link rel="stylesheet" href="style.css"/>
   <script>
-    // redirect ไป menu ถ้าไม่มี ?play=1
     if (window.location.search.indexOf('play=1') === -1) {
       window.location.replace('menu.html');
     }
@@ -15,13 +14,21 @@
 <body>
 
   <!-- หน้าบอกหมุนจอ -->
-  <div class="rotate-screen" id="rotateScreen">
-    <div class="rotate-inner">
-      <div class="rotate-icon">📱</div>
-      <div class="rotate-arrow">↻</div>
-      <div class="rotate-text">กรุณาหมุนจอเป็นแนวนอน</div>
-      <div class="rotate-sub">เกมนี้เล่นได้ในโหมด Landscape เท่านั้น</div>
-    </div>
+  <div id="rotateScreen" style="
+    display:none;position:fixed;inset:0;z-index:99999;
+    background:#0f172a;flex-direction:column;
+    align-items:center;justify-content:center;gap:16px;
+    font-family:system-ui,sans-serif;
+  ">
+    <div style="font-size:4rem;animation:spin 1.5s ease-in-out infinite alternate">📱</div>
+    <div style="font-size:1rem;font-weight:700;color:#f1f5f9">กรุณาหมุนจอเป็นแนวนอน</div>
+    <div style="font-size:.75rem;color:#94a3b8">เกมนี้เล่นได้ในโหมด Landscape เท่านั้น</div>
+    <style>
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(90deg); }
+      }
+    </style>
   </div>
 
   <!-- HUD -->
@@ -33,12 +40,12 @@
     <div class="hud-center">
       <span class="game-title">KIWI SHOOTER</span>
     </div>
-    <div class="hud-block" style="flex-direction:row;gap:10px;align-items:center">
+    <div class="hud-block" style="flex-direction:row;gap:8px;align-items:center">
       <div style="display:flex;flex-direction:column;align-items:center">
         <span class="hud-label">⭐ เควส</span>
         <span class="hud-value" id="questCount">0/0</span>
       </div>
-      <button onclick="goMenu()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#94a3b8;border-radius:8px;padding:4px 8px;font-size:.65rem;cursor:pointer;-webkit-tap-highlight-color:transparent">☰ เมนู</button>
+      <button onclick="goMenu()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#94a3b8;border-radius:8px;padding:4px 8px;font-size:.65rem;cursor:pointer;-webkit-tap-highlight-color:transparent">☰</button>
     </div>
   </header>
 
@@ -75,18 +82,26 @@
       window.location.href = 'menu.html';
     }
 
-    // lock landscape
-    if (screen.orientation && screen.orientation.lock) {
-      screen.orientation.lock('landscape').catch(function(){});
+    // Landscape lock
+    function tryLock() {
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('landscape').catch(function(){});
+      }
     }
+    tryLock();
+    document.addEventListener('touchstart', tryLock, { once: true });
 
+    // แสดง/ซ่อนหน้าหมุนจอ
     function checkOrientation() {
       var rs = document.getElementById('rotateScreen');
       if (!rs) return;
-      rs.style.display = window.innerWidth > window.innerHeight ? 'none' : 'flex';
+      var isLandscape = window.innerWidth > window.innerHeight;
+      rs.style.display = isLandscape ? 'none' : 'flex';
     }
     window.addEventListener('resize', checkOrientation);
-    window.addEventListener('orientationchange', function(){ setTimeout(checkOrientation, 200); });
+    window.addEventListener('orientationchange', function(){
+      setTimeout(checkOrientation, 300);
+    });
     checkOrientation();
   </script>
 </body>

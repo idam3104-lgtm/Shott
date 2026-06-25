@@ -1,0 +1,467 @@
+/* ═══════════════════════════════════════
+   KIWI SHOOTER — style.css (responsive)
+═══════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --sky:   #1a1f35;
+  --green: #4ade80;
+  --gold:  #fbbf24;
+  --red:   #f87171;
+  --panel: #0f172a;
+  --card:  #1e293b;
+  --text:  #f1f5f9;
+  --muted: #94a3b8;
+  --r: cubic-bezier(.25,.8,.25,1);
+
+  /* panel width ปรับตามจอ */
+  --panel-w: 180px;
+}
+
+/* มือถือเล็ก */
+@media (max-width: 480px)  { :root { --panel-w: 0px; } }
+@media (min-width: 481px) and (max-width: 640px)  { :root { --panel-w: 120px; } }
+@media (min-width: 641px) and (max-width: 900px)  { :root { --panel-w: 150px; } }
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: var(--sky);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 16px;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+/* ─── HUD ─────────────────────────────── */
+.hud {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 52px;
+  background: rgba(15,23,42,.95);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  z-index: 100;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.hud-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 64px;
+}
+.hud-label {
+  font-size: clamp(.5rem, 1.8vw, .65rem);
+  letter-spacing: .08em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.hud-value {
+  font-size: clamp(.9rem, 3.5vw, 1.1rem);
+  font-weight: 700;
+  color: var(--gold);
+  line-height: 1.2;
+}
+.hud-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.game-title {
+  font-size: clamp(.6rem, 3vw, .85rem);
+  font-weight: 800;
+  letter-spacing: .18em;
+  color: var(--green);
+  text-transform: uppercase;
+}
+
+/* ─── Layout ──────────────────────────── */
+.game-area {
+  position: fixed;
+  top: 52px; bottom: 0;
+  left: var(--panel-w);
+  right: var(--panel-w);
+  overflow: hidden;
+  background: linear-gradient(180deg, #0f172a 0%, #1e293b 60%, #0f2318 100%);
+  cursor: crosshair;
+}
+
+.panel {
+  position: fixed;
+  top: 52px; bottom: 0;
+  width: var(--panel-w);
+  background: var(--panel);
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: var(--panel-w) > 0 ? 12px 8px : 0;
+}
+.panel-left  { left: 0;  border-right: 1px solid rgba(255,255,255,.05); padding: 12px 8px; }
+.panel-right { right: 0; border-left:  1px solid rgba(255,255,255,.05); padding: 12px 8px; }
+
+/* ซ่อน panel ถ้าหน้าจอเล็กมาก */
+@media (max-width: 480px) {
+  .panel { display: none; }
+}
+
+.panel-title {
+  font-size: clamp(.6rem, 2vw, .75rem);
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+
+/* ─── Crosshair (desktop) ─────────────── */
+.crosshair {
+  position: fixed;
+  font-size: 1.4rem;
+  color: var(--green);
+  pointer-events: none;
+  z-index: 200;
+  transform: translate(-50%,-50%);
+  text-shadow: 0 0 8px var(--green);
+}
+@media (hover: none) {
+  /* มือถือไม่มี cursor ซ่อนไป */
+  .crosshair { display: none; }
+  html, body { cursor: default; }
+  .game-area { cursor: default; }
+}
+
+/* ─── Kiwi ────────────────────────────── */
+.kiwi {
+  position: absolute;
+  font-size: clamp(1.8rem, 5vw, 2.4rem);
+  cursor: pointer;
+  animation: kiwiFly linear forwards;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,.4));
+  /* ทำให้กดบนมือถือง่ายขึ้น */
+  padding: 8px;
+  -webkit-tap-highlight-color: transparent;
+}
+@keyframes kiwiFly {
+  from { transform: translateX(0); }
+  to   { transform: translateX(var(--travel)); }
+}
+
+/* ─── Explosion ───────────────────────── */
+.explosion {
+  position: absolute;
+  pointer-events: none;
+  animation: explode .5s ease-out forwards;
+  transform: translate(-50%,-50%);
+  z-index: 50;
+}
+@keyframes explode {
+  0%   { transform: translate(-50%,-50%) scale(.5); opacity: 1; }
+  60%  { transform: translate(-50%,-50%) scale(1.6); opacity: 1; }
+  100% { transform: translate(-50%,-50%) scale(2);   opacity: 0; }
+}
+
+/* ─── Float text ──────────────────────── */
+.float-text {
+  position: absolute;
+  font-size: clamp(.8rem, 2.5vw, .95rem);
+  font-weight: 700;
+  color: var(--gold);
+  pointer-events: none;
+  animation: floatUp .8s ease-out forwards;
+  white-space: nowrap;
+  z-index: 60;
+  text-shadow: 0 1px 4px rgba(0,0,0,.8);
+}
+@keyframes floatUp {
+  0%   { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-60px); opacity: 0; }
+}
+
+/* ─── Item cards ──────────────────────── */
+.item-card {
+  background: var(--card);
+  border-radius: 8px;
+  padding: 8px;
+  margin-bottom: 8px;
+  border: 1px solid rgba(255,255,255,.06);
+  transition: border-color .2s;
+}
+.item-card:hover { border-color: var(--green); }
+
+.item-icon { font-size: clamp(1.2rem, 3vw, 1.5rem); margin-bottom: 3px; }
+.item-name { font-size: clamp(.65rem, 1.8vw, .78rem); font-weight: 600; color: var(--text); }
+.item-desc { font-size: clamp(.58rem, 1.6vw, .68rem); color: var(--muted); margin: 3px 0 6px; line-height: 1.4; }
+.item-cost { font-size: clamp(.62rem, 1.7vw, .72rem); color: var(--gold); margin-bottom: 5px; font-weight: 600; }
+
+.btn-buy {
+  width: 100%;
+  padding: 6px 0;
+  border: none;
+  border-radius: 6px;
+  background: var(--green);
+  color: #0f172a;
+  font-size: clamp(.62rem, 1.8vw, .72rem);
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: .04em;
+  transition: background .2s, transform .1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-buy:active  { transform: scale(.96); }
+.btn-buy:disabled {
+  background: #334155;
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+/* ─── Quest cards ─────────────────────── */
+.quest-card {
+  background: var(--card);
+  border-radius: 8px;
+  padding: 8px;
+  margin-bottom: 8px;
+  border: 1px solid rgba(255,255,255,.06);
+  transition: border-color .3s;
+}
+.quest-card.done { border-color: var(--gold); }
+
+.quest-name   { font-size: clamp(.65rem, 1.8vw, .78rem); font-weight: 600; color: var(--text); margin-bottom: 3px; }
+.quest-desc   { font-size: clamp(.58rem, 1.6vw, .68rem); color: var(--muted); margin-bottom: 6px; line-height: 1.4; }
+.quest-reward { font-size: clamp(.6rem, 1.7vw, .68rem); color: var(--gold); margin-top: 4px; font-weight: 600; }
+
+.quest-progress-bar {
+  height: 5px;
+  background: #334155;
+  border-radius: 99px;
+  overflow: hidden;
+  margin-bottom: 3px;
+}
+.quest-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--green), var(--gold));
+  border-radius: 99px;
+  transition: width .4s var(--r);
+}
+.quest-progress-label { font-size: .6rem; color: var(--muted); text-align: right; }
+.quest-done-badge {
+  font-size: .6rem;
+  background: var(--gold);
+  color: #0f172a;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 99px;
+  display: inline-block;
+  margin-top: 4px;
+}
+
+/* ─── Multiplier flash ───────────────── */
+.multiplier-flash {
+  position: fixed;
+  top: 62px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: clamp(1rem, 4vw, 1.4rem);
+  font-weight: 800;
+  color: var(--gold);
+  text-shadow: 0 0 16px var(--gold);
+  pointer-events: none;
+  opacity: 0;
+  z-index: 150;
+  white-space: nowrap;
+  text-align: center;
+}
+.multiplier-flash.show {
+  animation: flashAnim .8s ease-out forwards;
+}
+@keyframes flashAnim {
+  0%   { opacity: 1; transform: translateX(-50%) scale(.8); }
+  40%  { opacity: 1; transform: translateX(-50%) scale(1.1); }
+  100% { opacity: 0; transform: translateX(-50%) scale(1); }
+}
+
+/* ─── Boss ────────────────────────────── */
+@keyframes bossBob {
+  from { transform: translate(-50%,-50%) scale(1)    rotate(-3deg); }
+  to   { transform: translate(-50%,-50%) scale(1.08) rotate(3deg);  }
+}
+
+/* boss ขนาด responsive */
+#boss {
+  font-size: clamp(3.5rem, 12vw, 6rem) !important;
+}
+
+/* Boss HP bar ปรับขนาดตามจอ */
+#bossHPWrap {
+  width: clamp(200px, 60vw, 320px) !important;
+}
+
+/* ─── Bottom drawer (มือถือเล็ก) ─────── */
+/* ถ้าหน้าจอเล็ก panel ซ่อนหมด → ใช้ bottom tab แทน */
+@media (max-width: 480px) {
+  .game-area {
+    bottom: 110px; /* เว้นที่ด้านล่าง */
+  }
+
+  .bottom-bar {
+    display: flex !important;
+  }
+}
+
+.bottom-bar {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 110px;
+  background: rgba(15,23,42,.97);
+  border-top: 1px solid rgba(255,255,255,.08);
+  z-index: 90;
+  flex-direction: column;
+}
+
+.bottom-tabs {
+  display: flex;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.bottom-tab {
+  flex: 1;
+  padding: 6px 0;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: .7rem;
+  font-weight: 600;
+  letter-spacing: .06em;
+  cursor: pointer;
+  text-transform: uppercase;
+  -webkit-tap-highlight-color: transparent;
+}
+.bottom-tab.active { color: var(--green); border-bottom: 2px solid var(--green); }
+
+.bottom-content {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* item card แนวนอนสำหรับ bottom bar */
+.bottom-content .item-card {
+  min-width: 120px;
+  margin-bottom: 0;
+  flex-shrink: 0;
+}
+.bottom-content .quest-card {
+  min-width: 150px;
+  margin-bottom: 0;
+  flex-shrink: 0;
+}
+
+/* ─── Touch ripple effect ────────────── */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  width: 60px; height: 60px;
+  background: rgba(74,222,128,.35);
+  transform: translate(-50%,-50%) scale(0);
+  pointer-events: none;
+  animation: rippleAnim .4s ease-out forwards;
+  z-index: 55;
+}
+@keyframes rippleAnim {
+  0%   { transform: translate(-50%,-50%) scale(0);   opacity: 1; }
+  100% { transform: translate(-50%,-50%) scale(2.5); opacity: 0; }
+}
+
+/* นกใหญ่ขึ้นบนมือถือให้กดง่าย */
+@media (hover: none) {
+  .kiwi {
+    font-size: clamp(2.2rem, 7vw, 3rem) !important;
+    padding: 12px !important;
+  }
+}
+
+/* ─── รูปภาพนกแทน emoji ─────────────── */
+.kiwi {
+  font-size: unset !important;
+  padding: 0 !important;
+  background: none;
+}
+.kiwi img {
+  width: clamp(50px, 10vw, 80px);
+  height: auto;
+  display: block;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+@media (hover: none) {
+  .kiwi img {
+    width: clamp(60px, 13vw, 100px) !important;
+  }
+}
+
+/* ─── Rotate screen overlay ──────────── */
+.rotate-screen {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: #0f172a;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.rotate-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.rotate-icon {
+  font-size: 3.5rem;
+  animation: tiltPhone 1.2s ease-in-out infinite alternate;
+}
+.rotate-arrow {
+  font-size: 2.5rem;
+  color: #4ade80;
+  animation: spinArrow 1.2s ease-in-out infinite alternate;
+}
+.rotate-text {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  letter-spacing: .05em;
+}
+.rotate-sub {
+  font-size: .75rem;
+  color: #94a3b8;
+}
+@keyframes tiltPhone {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(90deg); }
+}
+@keyframes spinArrow {
+  from { opacity: .3; transform: scale(.9); }
+  to   { opacity: 1;  transform: scale(1.1); }
+}
+
+/* landscape เท่านั้น — ซ่อน bottom bar เพราะมี panel อยู่แล้ว */
+@media (orientation: landscape) and (max-height: 480px) {
+  .panel { display: block !important; width: 140px; }
+  .game-area { left: 140px; right: 140px; bottom: 0; }
+  .bottom-bar { display: none !important; }
+  .panel-title { font-size: .6rem; }
+  .item-card, .quest-card { padding: 5px; margin-bottom: 5px; }
+}

@@ -6,8 +6,8 @@
   <title>Kiwi Shooter 🐦</title>
   <link rel="stylesheet" href="style.css"/>
   <script>
-    // redirect ไป menu ถ้าไม่ได้มาจาก menu
-    if (!sessionStorage.getItem('fromMenu')) {
+    // redirect ไป menu ถ้าไม่มี ?play=1
+    if (window.location.search.indexOf('play=1') === -1) {
       window.location.replace('menu.html');
     }
   </script>
@@ -72,7 +72,6 @@
   <script src="game.js"></script>
   <script>
     function goMenu() {
-      sessionStorage.removeItem('fromMenu');
       window.location.href = 'menu.html';
     }
 
@@ -88,22 +87,6 @@
     }
     window.addEventListener('resize', checkOrientation);
     window.addEventListener('orientationchange', function(){ setTimeout(checkOrientation, 200); });
-    checkOrientation();
-  </script>
-</body>
-</html>
-
-    function checkOrientation() {
-      var rs = document.getElementById('rotateScreen');
-      if (!rs) return;
-      var isLandscape = window.innerWidth > window.innerHeight;
-      rs.style.display = isLandscape ? 'none' : 'flex';
-    }
-
-    window.addEventListener('resize', checkOrientation);
-    window.addEventListener('orientationchange', function() {
-      setTimeout(checkOrientation, 200);
-    });
     checkOrientation();
   </script>
 </body>

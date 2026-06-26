@@ -11,6 +11,9 @@ const state = {
   wave: 1, nextBossAt: 100, questWave: 1,
 };
 
+
+/* save/load อยู่ใน save.js */
+
 /* ── DOM ── */
 const gameArea   = document.getElementById('gameArea');
 const moneyEl    = document.getElementById('money');
@@ -424,16 +427,16 @@ function switchTab(tab) {
    START
 ══════════════════════════════════════ */
 function startGame() {
-  makeItems(); makeQuests(1);
+  makeItems();
+  makeQuests(state.questWave);
+  loadGame(); // โหลด save ก่อน
   applyTheme(); updateHUD();
   renderItems(); renderQuests();
   restartSpawn(); spawnKiwi();
 }
 
 /* ── INIT ── */
-makeItems(); makeQuests(1);
-applyTheme(); updateHUD();
-renderItems(); renderQuests();
+makeItems(); makeQuests(1); // default ก่อน โหลดจริงใน startGame
 
 // รอ user แตะหน้าจอก่อน unlock audio แล้วค่อย start
 document.addEventListener('touchstart', function onFirstTouch() {

@@ -315,13 +315,14 @@ function spawnKiwi() {
   // ใช้รูปภาพแทน emoji
   var img = document.createElement('img');
   img.src = isGolden ? 'gold.png' : 'kiwi.png';
-  img.style.cssText = 'width:clamp(50px,10vw,80px);height:auto;display:block;pointer-events:none';
+  // หันหน้าตามทิศที่บิน: right=บินขวา→หันขวา, left=บินซ้าย→กลับรูป
+  img.style.cssText = 'width:clamp(50px,10vw,80px);height:auto;display:block;pointer-events:none;transform:scaleX(' + (right ? '1' : '-1') + ')';
   img.draggable = false;
   kiwi.appendChild(img);
 
   kiwi.style.top       = (5 + Math.random() * 75) + '%';
   kiwi.style.left      = right ? '-60px' : (ar.width + 60) + 'px';
-  kiwi.style.transform = right ? 'scaleX(1)' : 'scaleX(-1)';
+  kiwi.style.transform = 'scaleX(1)'; // reset kiwi div, flip อยู่ที่ img แล้ว
   var travel = (ar.width + 120) * (right ? 1 : -1);
   kiwi.style.setProperty('--travel', travel + 'px');
   kiwi.style.animationDuration = (3000 + Math.random() * 4000) + 'ms';
